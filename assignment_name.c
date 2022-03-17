@@ -144,33 +144,34 @@ int main(int argc, char **argv)
 
 // 선형탐색(linear search) 버전
 void load_names_lsearch( FILE *fp, int year_index, tNames *names){
-    if(year_index==0){
-        int zero_index = 0;
-        char *buffer = (char *)malloc( sizeof(char)*20); 
-        while(EOF != (fscanf(fp, "%[^,]c", buffer))){
-            names->len++;
-          
-            if(names->len > names->capacity){
-                names->capacity *= 2;
-                names->data = realloc(names->data, names->capacity*sizeof(tName));
-            }
+   if(year_index==0){
+      int zero_index = 0;
+      char *buffer = (char *)malloc( sizeof(char)*20); 
+      while(EOF != (fscanf(fp, "%[^,]c", buffer))){
+         names->len++;
+         
+         if(names->len > names->capacity){
+            names->capacity *= 2;
+            names->data = realloc(names->data, names->capacity*sizeof(tName));
+         }
             
-            char trash;
-            strcpy(names->data[zero_index].name, strsep(&buffer, ","));
-            fscanf(fp, "%c", &trash);
-            fscanf(fp, "%c", &names->data[zero_index].sex);
-            memset(names->data[zero_index].freq, 0, sizeof(names->data[zero_index].freq));
-            fscanf(fp, "%c", &trash);
-            fscanf(fp, "%d", &names->data[zero_index].freq[year_index]);
+         char trash;
+         strcpy(names->data[zero_index].name, strsep(&buffer, ","));
+         fscanf(fp, "%c", &trash);
+         fscanf(fp, "%c", &names->data[zero_index].sex);
+         memset(names->data[zero_index].freq, 0, sizeof(names->data[zero_index].freq));
+         fscanf(fp, "%c", &trash);
+         fscanf(fp, "%d", &names->data[zero_index].freq[year_index]);
 
-            zero_index++;
-            free(buffer);
-            char *buffer = (char *)malloc( sizeof(char)*20); 
-        };
-        free(buffer);
+         zero_index++;
+         free(buffer);
+         char *buffer = (char *)malloc( sizeof(char)*20); 
+      };
+      free(buffer);
    }
    else{
-       
+      int number = names->len;
+      
    }
 
 };
