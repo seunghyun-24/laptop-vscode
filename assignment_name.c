@@ -156,7 +156,7 @@ void load_names_lsearch( FILE *fp, int year_index, tNames *names){
          }
             
          char trash;
-         strcpy(names->data[zero_index].name, strsep(&buffer, ","));
+         strcpy(names->data[zero_index].name, buffer);
          fscanf(fp, "%c", &trash);
          fscanf(fp, "%c", &names->data[zero_index].sex);
          memset(names->data[zero_index].freq, 0, sizeof(names->data[zero_index].freq));
@@ -170,8 +170,62 @@ void load_names_lsearch( FILE *fp, int year_index, tNames *names){
       free(buffer);
    }
    else{
-      int number = names->len;
-      
+      int first_cnt = names->len;
+      char *buffer2 = (char*)malloc( sizeof(char)*20);
+      int something = 0;
+      while(EOF != fscanf(fp, "%[^,]c", buffer2)){
+         something = 0;
+         for(int search_index = 0; search_index < first_cnt; search_index++){
+            if(strcmp(buffer2, names->data[search_index].name) == 0){
+               char trash;
+               fscanf(fp, "%c", &trash);
+               fscanf(fp, "%c", &trash);
+               if(strcmp(trash, names->data[search_index].sex)==0){
+                  fscanf(fp, "%c", &trash);
+                  fscanf(fp, "%d", &names->data[search_index].freq[year_index]);
+                  free(buffer2);
+                  something++;
+                  char *buffer2 = (char*)malloc( sizeof(char)*20);
+                  break;
+               }
+               else{
+                  names->len++;
+                  if(names->len > names->capacity){
+                     names->capacity *= 2;
+                     names->data = realloc(names->data, names->capacity*sizeof(tName));
+                  }
+                  strcpy(names->data[first_cnt].sex, &trash);
+                  fscanf(fp, "%c", &trash);
+                  memset(names->data[first_cnt].freq, 0, sizeof(names->data[first_cnt].freq));
+                  fscanf(fp, "%d", &names->data[first_cnt].freq[year_index]);
+                  first_cnt++;
+                  something++;
+                  free(buffer2);
+                  char *buffer2 = (char*)malloc( sizeof(char)*20);
+                  break;
+               }
+            }
+         }
+
+         if(something==0){
+            names->len++;
+            if(names->len > names->capacity){
+               names->capacity *= 2;
+               names->data = realloc(names->data, names->capacity*sizeof(tName));
+            }
+            strcpy(names->data[first_cnt].name, buffer2);
+            char trash;
+            fscanf(fp, "%c", &trash);
+            fscanf(fp, "%c", &names->data[first_cnt].sex);
+            fscanf(fp, "%c", &trash);
+            memset(names->data[first_cnt].freq, 0, sizeof(names->data[first_cnt]));
+            fscanf(fp, "%d", &names->data[first_cnt].freq[year_index]);
+            first_cnt++;               
+            free(buffer2);
+            char *buffer2 = (char*)malloc( sizeof(char)*20);
+         }
+      }
+      free(buffer2);
    }
 
 };
