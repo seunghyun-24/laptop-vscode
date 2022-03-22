@@ -261,3 +261,144 @@ int compare( const void *n1, const void *n2){
    else return strcmp(str1->name, str2->name);
 
 };
+
+
+else{
+
+      int first_count = names->len;
+         int checking = names->len;
+         char *buffer = (char*)malloc( sizeof(char)*30);
+      char *buffer2 = (char*)malloc( sizeof(char)*20);
+      char buffersex;
+      int bufferfreq = 0;
+         int something = 0;
+         
+
+      while(EOF != fscanf(fp, "%s", buffer)){ 
+         something = 0;
+
+         for(int i=0; i<strlen(buffer); i++){
+            if(buffer[i] == ','){
+               buffer[i] = ' ';
+            }
+         }
+
+         sscanf(buffer, "%s %c %d", buffer2, &buffersex, &bufferfreq);
+         
+         for(int search_index = 0; search_index < first_count; search_index++){
+            
+            if(strcmp(buffer2, names->data[search_index].name) == 0){
+               
+               if( (buffersex - names->data[search_index].sex) == 0 ){
+                  names->data[search_index].freq[year_index] = bufferfreq;
+                  something = -1;
+                  break;
+               }
+            }
+         }
+
+         if(something != -1){
+            names->len++;
+            if(names->len > names->capacity){
+               names->capacity = names->capacity*2;
+               names->data = (tName *)realloc(names->data, names->capacity*sizeof(tName));
+            }
+            strcpy(names->data[checking].name, buffer2);
+            strcpy(&names->data[checking].sex, &buffersex);
+            memset(&names->data[checking].freq[year_index], 0, sizeof(names->data->freq));
+            names->data[checking].freq[year_index] = bufferfreq;
+            checking++;
+         }
+      }
+      free(buffer);
+      free(buffer2);
+      }
+   
+};
+
+
+
+
+
+
+void load_names_bsearch( FILE *fp, int year_index, tNames *names){
+
+   if(year_index == 0){
+      int zero_index = 0;
+      char *buffer = (char *)malloc( sizeof(char)*30);
+
+      while(EOF != fscanf(fp, "%s", buffer)){
+         names->len++;
+
+         if(names->len > names->capacity){
+            names->capacity = names->capacity*2;
+            names->data = (tName *)realloc(names->data, names->capacity*sizeof(tName));
+         }
+
+         for(int i=0; i<strlen(buffer); i++){
+            if(buffer[i] == ','){
+               buffer[i] = ' ';
+            }
+         }
+         memset(&names->data[zero_index].freq[year_index], 0, sizeof(names->data->freq)); //초기화
+         sscanf(buffer, "%s %c %d", names->data[zero_index].name, &names->data[zero_index].sex, &names->data[zero_index].freq[year_index]);
+         zero_index++;
+      }
+      free(buffer);
+   }
+
+   else{
+
+      int first_cnt = names->len;
+      int checking = names->len;   
+      char *buffer = (char*)malloc( sizeof(char)*30);
+      char *buffer2 = (char*)malloc( sizeof(char)*20);
+      char buffersex;
+      int bufferfreq = 0;
+
+      int index = 0;
+      int something = 0;
+         
+
+      while(EOF != fscanf(fp, "%s", buffer)){ 
+         something = 0;
+         for(int i=0; i<strlen(buffer); i++){
+            if(buffer[i] == ','){
+               buffer[i] = ' ';
+            }
+         }
+
+         sscanf(buffer, "%s %c %d", buffer2, &buffersex, &bufferfreq);
+
+         tName *ptr = (tName *)bsearch(buffer2, names->data, first_cnt, sizeof(tName), compare);
+         
+         if(ptr != NULL){
+            if (buffersex - names->data[ptr-names->data].sex == 0){
+               ptr->freq[year_index] = bufferfreq;
+            }
+            else{ 
+               if (strcmp(names->data[ptr-names->data].name, names->data[ptr-names->data +1].name) == 0 ){
+                  names->data[ptr-names->data +1].freq[year_index] = bufferfreq;
+               }
+               else if (strcmp(names->data[ptr-names->data].name, names->data[ptr-names->data -1].name) == 0 ){
+                  names->data[ptr-names->data -1].freq[year_index] = bufferfreq;
+               }
+               else something = -1;
+            }
+         }
+         else something = -1;
+
+         if (something == -1){
+            names->len++;
+            if(names->len > names->capacity){
+               names->capacity = names->capacity*2;
+               names->data = (tName *)realloc(names->data, names->capacity*sizeof(tName));
+            }
+            strcpy(names->data[checking].name, buffer2);
+            strcpy(&names->data[checking].sex, &buffersex);
+            memset(&names->data[checking].freq[year_index], 0, sizeof(names->data->freq)); //초기화
+            names->data[checking].freq[year_index] = bufferfreq;
+            checking++;
+         }
+
+      }
